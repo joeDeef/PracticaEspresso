@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">PracticaEspresso</string>
+    <string name="textBtnLogin">Ingresar</string>
+    <string name="textBtnSignup">Crear Cuenta</string>
+    <string name="textLabelEmail">Email</string>
+    <string name="txtLabelLogin">Iniciar Sesión</string>
+    <string name="textLabelPassword">Contraseña</string>
+    <string name="txtLabelName">Nombre</string>
+    <string name="txtLabelAge">Edad</string>
+    <string name="txtLabelBienvenido">Bienvenido/a \n%1$s</string>
+    <string name="txtNameUser">Nombre</string>
+    <string name="txtLabelSaldo">Saldo</string>
+    <string name="txtSaldoUser">Saldo Actual</string>
+
+</resources>
