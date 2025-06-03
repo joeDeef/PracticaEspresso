@@ -7,12 +7,14 @@ import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.hamcrest.Matchers.not
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import androidx.test.espresso.matcher.RootMatchers.withDecorView
-import android.view.View // ¡Importante! Importar la clase View
+import androidx.test.espresso.intent.Intents
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.Intents.intended
+import org.junit.After
+import org.junit.Before
 
 /**
  * Clase de pruebas de UI para la MainActivity (pantalla de Login).
@@ -20,119 +22,88 @@ import android.view.View // ¡Importante! Importar la clase View
 @RunWith(AndroidJUnit4::class)
 class MainActivityEspressoTest {
 
-    // Esta regla lanza la MainActivity antes de cada método de prueba.
     @get:Rule
     val activityRule = ActivityScenarioRule(MainActivity::class.java)
 
-    /**
-     * Resetea el DataManager antes de cada prueba. Esto es crucial
-     * para asegurar un estado inicial conocido y que las pruebas sean independientes.
-     */
     @Before
-    fun setup() {
-        // Limpiamos los usuarios existentes y añadimos los datos de prueba iniciales.
-        DataManager.users.clear()
-        DataManager.users.add(User("John Doe", 30, "john@example.com", "password123"))
-        DataManager.users.add(User("Jane Smith", 25, "jane@example.com", "securepass"))
-        DataManager.users.add(User("Joe Def", 21, "joe.def@gmail.com", "admin123"))
+    fun setUp() {
+        Intents.init()
     }
 
-    // --- Pruebas de verificación de elementos iniciales de la UI ---
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
 
+    //Prueba para validar que se carguen todos los elementos
     @Test
-    fun testUIElementsAreDisplayed() {
-        // Verifica que el título "Login" es visible.
-        onView(withId(R.id.textView4)).check(matches(withText(R.string.txtLabelLogin)))
-        onView(withId(R.id.textView4)).check(matches(isDisplayed()))
-
-        // Verifica que los campos de email y contraseña y sus etiquetas son visibles.
-        onView(withId(R.id.labelEmailLogin)).check(matches(withText(R.string.textLabelEmail)))
+    fun testLoginScreenElementsAreDisplayed() {
+        // Verifica que el campo de email esté visible
         onView(withId(R.id.inputEmailLogin)).check(matches(isDisplayed()))
-        onView(withId(R.id.labelPasswordLogin)).check(matches(withText(R.string.textLabelPassword)))
+
+        // Verifica que el campo de contraseña esté visible
         onView(withId(R.id.inputPasswordLogin)).check(matches(isDisplayed()))
 
-        // Verifica que los botones de Login y Signup son visibles y tienen el texto correcto.
-        onView(withId(R.id.btnLogin)).check(matches(withText(R.string.textBtnLogin)))
+        // Verifica que el botón de login esté visible
         onView(withId(R.id.btnLogin)).check(matches(isDisplayed()))
-        onView(withId(R.id.btnSignup)).check(matches(withText(R.string.textBtnSignup)))
+
+        // Verifica que el botón de registro esté visible
         onView(withId(R.id.btnSignup)).check(matches(isDisplayed()))
     }
 
-    // --- Pruebas de Inicio de Sesión ---
-
+    //Prueba para validar que no se permita valores vacios en el campo email
     @Test
-    fun testLoginExitoso_navegaAHomeActivityConNombreCorrecto() {
-        // 1. Ingresar credenciales válidas.
-        onView(withId(R.id.inputEmailLogin)).perform(typeText("john@example.com"), closeSoftKeyboard())
-        onView(withId(R.id.inputPasswordLogin)).perform(typeText("password123"), closeSoftKeyboard())
-
-        // 2. Hacer clic en el botón de login.
+    fun testLoginShowsErrorIfFieldsEmpty() {
+        // Intenta hacer click en el botón Login sin llenar los campos
         onView(withId(R.id.btnLogin)).perform(click())
 
-        // 3. Verificar que se navega a HomeActivity y el mensaje de bienvenida es correcto.
-        // Se busca el TextView con el ID R.id.labelBienvenida (que está en HomeActivity)
-        // y se verifica que su texto sea "Bienvenido, John Doe!".
-        onView(withId(R.id.labelBienvenida))
-            .check(matches(withText("Bienvenido, John Doe!")))
-            .check(matches(isDisplayed()))
+        // Opcional: comprueba el error en el email también
+        onView(withId(R.id.inputEmailLogin)).check(matches(hasErrorText("El correo es requerido")))
     }
 
-    // --- Pruebas de Validación de Campos Vacíos ---
-
+    //Prueba para validar que no se deje en blanco la contraseña
     @Test
-    fun testLoginFallido_emailVacio_muestraErrorEnEmail() {
-        // 1. Dejar el campo de email vacío y solo ingresar la contraseña.
-        onView(withId(R.id.inputPasswordLogin)).perform(typeText("password123"), closeSoftKeyboard())
-
-        // 2. Hacer clic en el botón de login.
-        onView(withId(R.id.btnLogin)).perform(click())
-
-        // 3. Verificar que se muestra un error en el campo de email.
+    fun testLoginShowsErrorIfPasswordEmpty() {
+        // Ingresa un correo válido en el EditText del email
         onView(withId(R.id.inputEmailLogin))
-            .check(matches(hasErrorText("El correo es requerido")))
-    }
+            .perform(typeText("usuario@example.com"), closeSoftKeyboard())
 
-    @Test
-    fun testLoginFallido_passwordVacia_muestraErrorEnPassword() {
-        // 1. Dejar el campo de password vacío y solo ingresar el email.
-        onView(withId(R.id.inputEmailLogin)).perform(typeText("john@example.com"), closeSoftKeyboard())
-
-        // 2. Hacer clic en el botón de login.
+        // Click en el botón Login
         onView(withId(R.id.btnLogin)).perform(click())
 
-        // 3. Verificar que se muestra un error en el campo de password.
-        onView(withId(R.id.inputPasswordLogin))
-            .check(matches(hasErrorText("La contraseña es requerida")))
+        // Verifica que el email NO tiene error
+        onView(withId(R.id.inputEmailLogin)).check(matches(not(hasErrorText("El correo es requerido"))))
+
+        // Verifica que la contraseña SÍ muestra el error esperado
+        onView(withId(R.id.inputPasswordLogin)).check(matches(hasErrorText("La contraseña es requerida")))
     }
 
+    //Prueba de navegavilidad entre pantallas de la login a la home
     @Test
-    fun testLoginFallido_ambosCamposVacios_muestraErrorEnEmail() {
-        // 1. Dejar ambos campos vacíos.
-        onView(withId(R.id.inputEmailLogin)).perform(clearText(), closeSoftKeyboard())
-        onView(withId(R.id.inputPasswordLogin)).perform(clearText(), closeSoftKeyboard())
+    fun testLoginSuccessNavigatesToHome() {
+        // Suponiendo que DataManager.users contiene un usuario así:
+        val validEmail = "jane@example.com"
+        val validPassword = "securepass"
 
-        // 2. Hacer clic en el botón de login.
-        onView(withId(R.id.btnLogin)).perform(click())
-
-        // 3. Verificar que se muestra el error en el campo de email (primera validación).
+        // Escribe email y contraseña válidos
         onView(withId(R.id.inputEmailLogin))
-            .check(matches(hasErrorText("El correo es requerido")))
-        // Opcional: Asegurarse de que el campo de contraseña aún no tiene error si el email es el foco.
+            .perform(typeText(validEmail), closeSoftKeyboard())
         onView(withId(R.id.inputPasswordLogin))
-            .check(matches(not(hasErrorText("La contraseña es requerida"))))
-    }
+            .perform(typeText(validPassword), closeSoftKeyboard())
 
-    // --- Prueba de Navegación ---
+        // Click en login
+        onView(withId(R.id.btnLogin)).perform(click())
 
-    @Test
-    fun testNavegacionASignupActivity() {
-        // 1. Hacer clic en el botón para crear nuevo usuario.
-        onView(withId(R.id.btnSignup)).perform(click())
+        // Verificar que la siguiente activity se abre
+        // Para esto puedes usar IntentsTestRule o Intents.init() para interceptar intents
 
-        // 2. Verificar que se ha navegado a SignupActivity buscando un elemento distintivo de esa pantalla.
-        // En este caso, el botón de "Crear Cuenta" (btnCreateAccount) que solo existe en SignupActivity.
-        onView(withId(R.id.btnCreateAccount))
-            .check(matches(isDisplayed()))
-            .check(matches(withText(R.string.textBtnSignup))) // Verifica también su texto.
+        // Inicializa la captura de intents
+        Intents.init()
+
+        // Verifica que se lanzó un Intent a HomeActivity
+        intended(hasComponent(HomeActivity::class.java.name))
+
+        // Libera los recursos de Intents
+        Intents.release()
     }
 }

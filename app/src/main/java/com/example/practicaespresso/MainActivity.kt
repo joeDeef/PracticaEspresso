@@ -1,7 +1,9 @@
 package com.example.practicaespresso
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
      * previously being shut down then this Bundle contains the data it most
      * recently supplied in [onSaveInstanceState]. Otherwise it is null.
      */
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Enables edge-to-edge display for a more immersive experience.
@@ -45,6 +48,29 @@ class MainActivity : AppCompatActivity() {
         editTextPassword = findViewById(R.id.inputPasswordLogin)
         buttonLogin = findViewById(R.id.btnLogin)
         buttonNewUser = findViewById(R.id.btnSignup)
+
+        var isPasswordVisible = false
+
+        editTextPassword.setOnTouchListener { v, event ->
+            if (event.rawX >= (editTextPassword.right - editTextPassword.compoundDrawables[2].bounds.width())) {
+                isPasswordVisible = !isPasswordVisible
+
+                if (isPasswordVisible) {
+                    editTextPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    editTextPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_open, 0)
+                } else {
+                    editTextPassword.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    editTextPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_closed, 0)
+                }
+
+                // Mueve el cursor al final
+                editTextPassword.setSelection(editTextPassword.text.length)
+
+                true // Evento manejado
+            } else {
+                false // Deja que el sistema maneje otros toques
+            }
+        }
 
         // Set up click listeners for the buttons.
         setupClickListeners()

@@ -7,7 +7,7 @@
     <string name="textLabelPassword">Contraseña</string>
     <string name="txtLabelName">Nombre</string>
     <string name="txtLabelAge">Edad</string>
-    <string name="txtLabelBienvenido">Bienvenido/a \n%1$s</string>
+    <string name="txtLabelBienvenido">Bienvenid@\n%1$s</string>
     <string name="txtNameUser">Nombre</string>
     <string name="txtLabelSaldo">Saldo</string>
     <string name="txtSaldoUser">Saldo Actual</string>

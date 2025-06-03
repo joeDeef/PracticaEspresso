@@ -39,8 +39,8 @@
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="361dp"
-        android:layout_height="55dp"
+        android:layout_width="382dp"
+        android:layout_height="51dp"
         android:layout_marginBottom="72dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout6"
@@ -51,18 +51,21 @@
             android:id="@+id/labelPasswordLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/textLabelPassword"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/inputPasswordLogin"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:inputType="text"
-            android:textSize="18sp" />
+            android:inputType="textPassword"
+            android:textSize="18sp"
+            android:drawableEnd="@drawable/ic_eye_closed"
+            android:paddingEnd="12dp" />
+
+
     </LinearLayout>
 
     <LinearLayout

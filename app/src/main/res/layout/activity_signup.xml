@@ -25,7 +25,7 @@
             android:textSize="18sp" />
 
         <EditText
-            android:id="@+id/inputNameSingup"
+            android:id="@+id/inputNameSignup"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:ems="10"
@@ -91,8 +91,11 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="text"
-            android:textSize="18sp" />
+            android:inputType="textPassword"
+            android:textSize="18sp"
+            android:drawableEnd="@drawable/ic_eye_closed"
+            android:paddingEnd="12dp" />
+
     </LinearLayout>
 
     <LinearLayout

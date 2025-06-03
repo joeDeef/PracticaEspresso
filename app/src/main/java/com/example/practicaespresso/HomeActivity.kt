@@ -1,5 +1,6 @@
 package com.example.practicaespresso
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -41,14 +42,12 @@ class HomeActivity : AppCompatActivity() {
         // Retrieve the user's name passed from the previous activity (MainActivity).
         val userName = intent.getStringExtra(MainActivity.NAME_USER)
 
-        // Set the welcome message using the retrieved user name.
-        if (userName != null) {
-            // If the user name is available, display a personalized welcome message.
-            labelBienvenida.text = getString(R.string.txtLabelBienvenido, userName)
-        } else {
-            // If the user name is not available (e.g., due to an unexpected state),
-            // display a generic welcome message.
-            labelBienvenida.text = getString(R.string.txtLabelBienvenido, "")
+        if (userName.isNullOrEmpty()) {
+            // Redirige al login si no hay nombre
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
         }
+        labelBienvenida.text = getString(R.string.txtLabelBienvenido, userName)
     }
 }

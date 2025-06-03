@@ -1,57 +1,84 @@
 package com.example.practicaespresso
 
 import android.content.Intent
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Clase de pruebas de UI para la HomeActivity.
- */
 @RunWith(AndroidJUnit4::class)
-class HomeActivityEspressoTest {
+class HomeActivityIntentTest {
 
-    // No usamos DataManager.users.clear() aquí porque HomeActivity solo lee datos pasados por Intent,
-    // no interactúa con DataManager directamente.
-
+    //Prueba para verificar que se pasa el contexto desde el login(main activity)
     @Test
-    fun testWelcomeMessage_withUserName() {
-        // 1. Crear un Intent para lanzar HomeActivity y pasar el nombre de usuario.
-        // Simulamos el Intent que MainActivity crearía al iniciar sesión.
-        val intent = Intent(ApplicationProvider.getApplicationContext(), HomeActivity::class.java).apply {
-            putExtra(MainActivity.NAME_USER, "Alice") // Pasamos el nombre de usuario "Alice"
+    fun testUserNameIsDisplayedFromIntent() {
+        // Preparar intent con el nombre de usuario
+        val intent = Intent(
+            androidx.test.core.app.ApplicationProvider.getApplicationContext(),
+            HomeActivity::class.java
+        ).apply {
+            putExtra(MainActivity.NAME_USER, "Joel")
         }
 
-        // 2. Lanzar HomeActivity con el Intent preparado.
-        // Usamos una ActivityScenarioRule específica para este test con el Intent.
-        val activityRule = ActivityScenarioRule<HomeActivity>(intent)
-        activityRule.scenario // Necesario para que la regla se inicialice
+        // Lanzar la actividad con el intent
+        ActivityScenario.launch<HomeActivity>(intent)
 
-        // 3. Verificar que el TextView de bienvenida muestra el nombre correcto.
+        // Verificar que el mensaje de bienvenida es correcto
         onView(withId(R.id.labelBienvenida))
-            .check(matches(withText("Bienvenido, Alice!"))) // Verifica el texto esperado
-            .check(matches(isDisplayed())) // Verifica que es visible
+            .check(matches(withText("Bienvenid@,\nJoel")))
     }
 
+    //Prueba para evitar ingresar directamente al home sin pasar por el login
     @Test
-    fun testWelcomeMessage_withoutUserName() {
-        // 1. Crear un Intent para lanzar HomeActivity SIN pasar un nombre de usuario.
-        val intent = Intent(ApplicationProvider.getApplicationContext(), HomeActivity::class.java)
+    fun testRedirectToLoginWhenNoUsername() {
+        // Lanzamos HomeActivity sin pasar extras (sin userName)
+        ActivityScenario.launch(HomeActivity::class.java)
 
-        // 2. Lanzar HomeActivity con el Intent (sin nombre).
-        val activityRule = ActivityScenarioRule<HomeActivity>(intent)
-        activityRule.scenario // Necesario para que la regla se inicialice
-
-        // 3. Verificar que el TextView de bienvenida muestra el mensaje genérico (sin nombre).
-        // Se espera "Bienvenido, !" porque así lo define getString(R.string.txtLabelBienvenido, "")
-        onView(withId(R.id.labelBienvenida))
-            .check(matches(withText("Bienvenido, !")))
+        // Comprobamos que el botón de login de MainActivity está visible,
+        // lo que indica que redirigió correctamente al login
+        onView(withId(R.id.btnLogin))
             .check(matches(isDisplayed()))
     }
+
+    //Prueba para validar que no se crashee la pantalla con nombres largos
+    @Test
+    fun testVeryLongNameDisplayedCorrectly() {
+        val longName = "Joel " + "ApellidosLargos".repeat(10)
+        val intent = Intent(ApplicationProvider.getApplicationContext(), HomeActivity::class.java).apply {
+            putExtra(MainActivity.NAME_USER, longName)
+        }
+
+        ActivityScenario.launch<HomeActivity>(intent)
+
+        onView(withId(R.id.labelBienvenida))
+            .check(matches(withText("Bienvenid@\n$longName")))
+    }
+
+    //Prueba para validar que todo funciona igual con la rotación de pantalla
+    @Test
+    fun testWelcomeMessagePersistsOnRotation() {
+        val userName = "Joel"
+        val intent = Intent(ApplicationProvider.getApplicationContext(), HomeActivity::class.java).apply {
+            putExtra(MainActivity.NAME_USER, userName)
+        }
+
+        val scenario = ActivityScenario.launch<HomeActivity>(intent)
+
+        onView(withId(R.id.labelBienvenida))
+            .check(matches(withText("Bienvenid@\n$userName")))
+
+        // Rota la pantalla (de portrait a landscape)
+        scenario.onActivity { activity ->
+            activity.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
+
+        // Espera y comprueba que el texto sigue igual
+        onView(withId(R.id.labelBienvenida))
+            .check(matches(withText("Bienvenid@\n$userName")))
+    }
+
 }

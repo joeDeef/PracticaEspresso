@@ -2,6 +2,7 @@ package com.example.practicaespresso
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.InputType
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -45,11 +46,34 @@ class SignupActivity : AppCompatActivity() {
         }
 
         // Initialize UI elements by finding their IDs in the layout.
-        inputName = findViewById(R.id.inputNameSingup)
+        inputName = findViewById(R.id.inputNameSignup)
         inputAge = findViewById(R.id.inputAgeSignup)
         inputEmailSignup = findViewById(R.id.inputEmailSignup)
         inputPasswordSignup = findViewById(R.id.inputPasswordSignup)
         btnRegister = findViewById(R.id.btnCreateAccount)
+
+        var isPasswordVisible = false
+
+        inputPasswordSignup.setOnTouchListener { v, event ->
+            if (event.rawX >= (inputPasswordSignup.right - inputPasswordSignup.compoundDrawables[2].bounds.width())) {
+                isPasswordVisible = !isPasswordVisible
+
+                if (isPasswordVisible) {
+                    inputPasswordSignup.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    inputPasswordSignup.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_open, 0)
+                } else {
+                    inputPasswordSignup.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    inputPasswordSignup.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_closed, 0)
+                }
+
+                // Mueve el cursor al final
+                inputPasswordSignup.setSelection(inputPasswordSignup.text.length)
+
+                true // Evento manejado
+            } else {
+                false // Deja que el sistema maneje otros toques
+            }
+        }
 
         // Set up the click listener for the register button.
         setupRegisterButtonListener()
@@ -77,6 +101,11 @@ class SignupActivity : AppCompatActivity() {
             val age = ageString.toIntOrNull()
             if (age == null || age <= 0) {
                 Toast.makeText(this, "Ingrese una edad válida", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener // Stop execution if age is invalid.
+            }
+
+            if (password == null || password.length < 8) {
+                Toast.makeText(this, "La contraseña debe tener minimo 8 caracteres", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener // Stop execution if age is invalid.
             }
 
